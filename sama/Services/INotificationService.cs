@@ -1,5 +1,6 @@
 ﻿using sama.Models;
 using System;
+using System.Threading.Tasks;
 
 namespace sama.Services
 {
@@ -14,12 +15,12 @@ namespace sama.Services
 
     public interface INotificationService
     {
-        void NotifySingleResult(Endpoint endpoint, EndpointCheckResult result);
+        Task NotifySingleResult(Endpoint endpoint, EndpointCheckResult result);
 
-        void NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf);
+        Task NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf);
 
-        void NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason);
+        Task NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason);
 
-        void NotifyMisc(Endpoint endpoint, NotificationType type);
+        Task NotifyMisc(Endpoint endpoint, NotificationType type);
     }
 }

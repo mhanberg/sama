@@ -114,7 +114,9 @@ namespace sama.Services
 
         private void NotifyNewestCheckResult(Endpoint endpoint, EndpointCheckResult endpointCheckResult)
         {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _notifier.NotifySingleResult(endpoint, endpointCheckResult);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private void NotifyUpDown(Endpoint endpoint, EndpointStatus status)
@@ -124,7 +126,9 @@ namespace sama.Services
                 if (status.IsUp == false)
                 {
                     // Endpoint has just come up
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     _notifier.NotifyUp(endpoint, status.DownAsOf);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
                 // If old status is true or null, don't notify that it's up
             }
@@ -133,12 +137,16 @@ namespace sama.Services
                 if (status.IsUp == null || status.IsUp == true)
                 {
                     // Endpoint has just gone down
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     _notifier.NotifyDown(endpoint, status.DownAsOf ?? status.InProgressResults.Last().Start, status.InProgressResults.Last().Error);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
                 else if (status.LastFinishedResults?.Last().Error?.ToString() != status.InProgressResults.Last().Error?.ToString())
                 {
                     // Endpoint is down, but with a different error
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                     _notifier.NotifyDown(endpoint, status.DownAsOf ?? status.InProgressResults.Last().Start, status.InProgressResults.Last().Error);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 }
             }
         }

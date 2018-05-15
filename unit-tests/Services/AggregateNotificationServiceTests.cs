@@ -4,6 +4,7 @@ using sama.Models;
 using sama.Services;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace TestSama.Services
 {
@@ -23,52 +24,52 @@ namespace TestSama.Services
         }
 
         [TestMethod]
-        public void ShouldNotifySingleResult()
+        public async Task ShouldNotifySingleResult()
         {
             var ep = new Endpoint();
             var ecr = new EndpointCheckResult();
 
-            _service.NotifySingleResult(ep, ecr);
+            await _service.NotifySingleResult(ep, ecr);
 
-            _notifier1.Received().NotifySingleResult(ep, ecr);
-            _notifier2.Received().NotifySingleResult(ep, ecr);
+            await _notifier1.Received().NotifySingleResult(ep, ecr);
+            await _notifier2.Received().NotifySingleResult(ep, ecr);
         }
 
         [TestMethod]
-        public void ShouldNotifyUp()
+        public async Task ShouldNotifyUp()
         {
             var ep = new Endpoint();
             var dao = DateTimeOffset.Now;
 
-            _service.NotifyUp(ep, dao);
+            await _service.NotifyUp(ep, dao);
 
-            _notifier1.Received().NotifyUp(ep, dao);
-            _notifier2.Received().NotifyUp(ep, dao);
+            await _notifier1.Received().NotifyUp(ep, dao);
+            await _notifier2.Received().NotifyUp(ep, dao);
         }
 
         [TestMethod]
-        public void ShouldNotifyDown()
+        public async Task ShouldNotifyDown()
         {
             var ep = new Endpoint();
             var dao = DateTimeOffset.Now;
             var reason = new Exception();
 
-            _service.NotifyDown(ep, dao, reason);
+            await _service.NotifyDown(ep, dao, reason);
 
-            _notifier1.Received().NotifyDown(ep, dao, reason);
-            _notifier2.Received().NotifyDown(ep, dao, reason);
+            await _notifier1.Received().NotifyDown(ep, dao, reason);
+            await _notifier2.Received().NotifyDown(ep, dao, reason);
         }
 
         [TestMethod]
-        public void ShouldNotifyMisc()
+        public async Task ShouldNotifyMisc()
         {
             var ep = new Endpoint();
             var type = NotificationType.EndpointReconfigured;
 
-            _service.NotifyMisc(ep, type);
+            await _service.NotifyMisc(ep, type);
 
-            _notifier1.Received().NotifyMisc(ep, type);
-            _notifier2.Received().NotifyMisc(ep, type);
+            await _notifier1.Received().NotifyMisc(ep, type);
+            await _notifier2.Received().NotifyMisc(ep, type);
         }
     }
 }

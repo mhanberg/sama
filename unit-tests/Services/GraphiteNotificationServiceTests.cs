@@ -5,6 +5,7 @@ using sama.Models;
 using sama.Services;
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace TestSama.Services
 {
@@ -31,7 +32,9 @@ namespace TestSama.Services
             _settings.Notifications_Graphite_Port.Returns(1234);
 
             _sentData = null;
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _tcpWrapper.When(t => t.SendData("asdf", 1234, Arg.Any<byte[]>()))
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
                 .Do(ci =>
                 {
                     var bytes = ci.Arg<byte[]>();
@@ -45,49 +48,49 @@ namespace TestSama.Services
         [DataRow("asdf123098-FDSA", "asdf123098-FDSA")]
         [DataRow("%Some  $  Thing!", "Some-Thing")]
         [DataRow("!*$^&#", "none")]
-        public void ShouldCorrectlyFilterEndpointNamesForGraphite(string input, string expectedOutput)
+        public async Task ShouldCorrectlyFilterEndpointNamesForGraphite(string input, string expectedOutput)
         {
-            _service.NotifySingleResult(new Endpoint { Name = input }, new EndpointCheckResult { Start = DateTimeOffset.UtcNow, Success = false });
+            await _service.NotifySingleResult(new Endpoint { Name = input }, new EndpointCheckResult { Start = DateTimeOffset.UtcNow, Success = false });
 
             var expectedSubstring = $"sama.{expectedOutput}.response.success ";
             StringAssert.StartsWith(_sentData, expectedSubstring);
         }
 
         [TestMethod]
-        public void ShouldNotifySingleResultFailure()
+        public async Task ShouldNotifySingleResultFailure()
         {
             var ep = new Endpoint { Name = "ep1" };
             var result = new EndpointCheckResult { Start = DateTimeOffset.Parse("2018-01-01T12:00:00.000"), Success = false };
 
-            _service.NotifySingleResult(ep, result);
+            await _service.NotifySingleResult(ep, result);
 
             Assert.AreEqual("sama.ep1.response.success 0 1514826000\n", _sentData);
         }
 
         [TestMethod]
-        public void ShouldNotifySingleResultSuccessWithoutResponseTime()
+        public async Task ShouldNotifySingleResultSuccessWithoutResponseTime()
         {
             var ep = new Endpoint { Name = "ep2" };
             var result = new EndpointCheckResult { Start = DateTimeOffset.Parse("2018-01-01T12:00:01.000"), Success = true };
 
-            _service.NotifySingleResult(ep, result);
+            await _service.NotifySingleResult(ep, result);
 
             Assert.AreEqual("sama.ep2.response.success 1 1514826001\n", _sentData);
         }
 
         [TestMethod]
-        public void ShouldNotifySingleResultSuccessWithResponseTime()
+        public async Task ShouldNotifySingleResultSuccessWithResponseTime()
         {
             var ep = new Endpoint { Name = "ep3" };
             var result = new EndpointCheckResult { Start = DateTimeOffset.Parse("2018-01-01T12:00:08.000"), Success = true, ResponseTime = TimeSpan.FromMilliseconds(54321) };
 
-            _service.NotifySingleResult(ep, result);
+            await _service.NotifySingleResult(ep, result);
 
             Assert.AreEqual("sama.ep3.response.success 1 1514826008\nsama.ep3.response.timeMsec 54321 1514826008\n", _sentData);
         }
 
         [TestMethod]
-        public void ShouldNotNotifyWhenUnconfigured()
+        public async Task ShouldNotNotifyWhenUnconfigured()
         {
             var ep = new Endpoint { Name = "epU" };
             var result = new EndpointCheckResult { Start = DateTimeOffset.Parse("2018-01-01T12:08:20.000"), Success = false };
@@ -95,16 +98,16 @@ namespace TestSama.Services
             _settings.Notifications_Graphite_Host.Returns("");
             _settings.Notifications_Graphite_Port.Returns(1234);
 
-            _service.NotifySingleResult(ep, result);
+            await _service.NotifySingleResult(ep, result);
 
-            _tcpWrapper.DidNotReceiveWithAnyArgs().SendData("", 0, Arg.Any<byte[]>());
+            await _tcpWrapper.DidNotReceiveWithAnyArgs().SendData("", 0, Arg.Any<byte[]>());
 
             _settings.Notifications_Graphite_Host.Returns("asdf");
             _settings.Notifications_Graphite_Port.Returns(0);
 
-            _service.NotifySingleResult(ep, result);
+            await _service.NotifySingleResult(ep, result);
 
-            _tcpWrapper.DidNotReceiveWithAnyArgs().SendData("", 0, Arg.Any<byte[]>());
+            await _tcpWrapper.DidNotReceiveWithAnyArgs().SendData("", 0, Arg.Any<byte[]>());
         }
     }
 }

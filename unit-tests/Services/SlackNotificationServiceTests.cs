@@ -43,7 +43,7 @@ namespace TestSama.Services
                     message = ci.Arg<HttpRequestMessage>();
                 });
 
-            _service.NotifyUp(new Endpoint { Name = "A" }, null);
+            await _service.NotifyUp(new Endpoint { Name = "A" }, null);
 
             await _httpHandler.Received(1).RealSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
             Assert.AreEqual("https://webhook.example.com/hook", message.RequestUri.ToString());
@@ -60,7 +60,7 @@ namespace TestSama.Services
                     message = ci.Arg<HttpRequestMessage>();
                 });
 
-            _service.NotifyUp(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow.AddHours(-5));
+            await _service.NotifyUp(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow.AddHours(-5));
 
             await _httpHandler.Received(1).RealSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
             Assert.AreEqual("https://webhook.example.com/hook", message.RequestUri.ToString());
@@ -77,7 +77,7 @@ namespace TestSama.Services
                     message = ci.Arg<HttpRequestMessage>();
                 });
 
-            _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("TESTERROR!"));
+            await _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("TESTERROR!"));
 
             await _httpHandler.Received(1).RealSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
             Assert.AreEqual("https://webhook.example.com/hook", message.RequestUri.ToString());
@@ -94,16 +94,16 @@ namespace TestSama.Services
                     message = ci.Arg<HttpRequestMessage>();
                 });
 
-            _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error1"));
+            await _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error1"));
             Assert.AreEqual(@"{""text"":""The endpoint 'A' is down: error1.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error2."));
+            await _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error2."));
             Assert.AreEqual(@"{""text"":""The endpoint 'A' is down: error2.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error3!"));
+            await _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error3!"));
             Assert.AreEqual(@"{""text"":""The endpoint 'A' is down: error3!""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error4?"));
+            await _service.NotifyDown(new Endpoint { Name = "A" }, DateTimeOffset.UtcNow, new Exception("error4?"));
             Assert.AreEqual(@"{""text"":""The endpoint 'A' is down: error4?""}", await message.Content.ReadAsStringAsync());
         }
 
@@ -117,19 +117,19 @@ namespace TestSama.Services
                     message = ci.Arg<HttpRequestMessage>();
                 });
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointAdded);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointAdded);
             Assert.AreEqual(@"{""text"":""The endpoint 'A' has been added.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointRemoved);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointRemoved);
             Assert.AreEqual(@"{""text"":""The endpoint 'A' has been removed.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointEnabled);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointEnabled);
             Assert.AreEqual(@"{""text"":""The endpoint 'A' has been enabled.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointDisabled);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointDisabled);
             Assert.AreEqual(@"{""text"":""The endpoint 'A' has been disabled.""}", await message.Content.ReadAsStringAsync());
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointReconfigured);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointReconfigured);
             Assert.AreEqual(@"{""text"":""The endpoint 'A' has been reconfigured.""}", await message.Content.ReadAsStringAsync());
         }
 
@@ -138,7 +138,7 @@ namespace TestSama.Services
         {
             _settings.Notifications_Slack_WebHook.Returns("");
 
-            _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointAdded);
+            await _service.NotifyMisc(new Endpoint { Name = "A" }, NotificationType.EndpointAdded);
 
             await _httpHandler.DidNotReceiveWithAnyArgs().RealSendAsync(Arg.Any<HttpRequestMessage>(), Arg.Any<CancellationToken>());
             _logger.DidNotReceiveWithAnyArgs().Log<object>(Arg.Any<LogLevel>(), Arg.Any<EventId>(), Arg.Any<object>(), Arg.Any<Exception>(), (a, b) => "");

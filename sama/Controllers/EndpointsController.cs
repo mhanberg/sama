@@ -259,7 +259,9 @@ namespace sama.Controllers
 
         private void NotifyEvent(Endpoint endpoint, NotificationType type)
         {
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _notifier.NotifyMisc(endpoint, type);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private void NotifyEditEvent(Endpoint oldEndpoint, Endpoint newEndpoint)
@@ -271,7 +273,9 @@ namespace sama.Controllers
             if (enabled) type = NotificationType.EndpointEnabled;
             if (disabled) type = NotificationType.EndpointDisabled;
 
+#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             _notifier.NotifyMisc(newEndpoint, type);
+#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
     }
 }

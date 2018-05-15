@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using sama.Models;
 using System;
 using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace sama.Services
 {
@@ -21,36 +22,37 @@ namespace sama.Services
             _serviceProvider = serviceProvider;
         }
 
-        public void NotifyMisc(Endpoint endpoint, NotificationType type)
+        public async Task NotifyMisc(Endpoint endpoint, NotificationType type)
         {
             switch (type)
             {
                 case NotificationType.EndpointAdded:
-                    SendNotification($"The endpoint '{endpoint.Name}' has been added.");
+                    await SendNotification($"The endpoint '{endpoint.Name}' has been added.");
                     break;
                 case NotificationType.EndpointRemoved:
-                    SendNotification($"The endpoint '{endpoint.Name}' has been removed.");
+                    await SendNotification($"The endpoint '{endpoint.Name}' has been removed.");
                     break;
                 case NotificationType.EndpointEnabled:
-                    SendNotification($"The endpoint '{endpoint.Name}' has been enabled.");
+                    await SendNotification($"The endpoint '{endpoint.Name}' has been enabled.");
                     break;
                 case NotificationType.EndpointDisabled:
-                    SendNotification($"The endpoint '{endpoint.Name}' has been disabled.");
+                    await SendNotification($"The endpoint '{endpoint.Name}' has been disabled.");
                     break;
                 case NotificationType.EndpointReconfigured:
-                    SendNotification($"The endpoint '{endpoint.Name}' has been reconfigured.");
+                    await SendNotification($"The endpoint '{endpoint.Name}' has been reconfigured.");
                     break;
                 default:
                     return;
             }
         }
 
-        public void NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
+        public Task NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
         {
             // Ignore this notification type.
+            return Task.CompletedTask;
         }
 
-        public void NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
+        public async Task NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
         {
             var failureMessage = reason?.Message;
 
@@ -65,23 +67,23 @@ namespace sama.Services
                 }
             }
 
-            SendNotification($"The endpoint '{endpoint.Name}' is down: {failureMessage}");
+            await SendNotification($"The endpoint '{endpoint.Name}' is down: {failureMessage}");
         }
 
-        public void NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
+        public async Task NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
         {
             if (downAsOf.HasValue)
             {
                 var downLength = DateTimeOffset.UtcNow - downAsOf.Value;
-                SendNotification($"The endpoint '{endpoint.Name}' is up after being down for {downLength.Humanize()}. Hooray!");
+                await SendNotification($"The endpoint '{endpoint.Name}' is up after being down for {downLength.Humanize()}. Hooray!");
             }
             else
             {
-                SendNotification($"The endpoint '{endpoint.Name}' is up. Hooray!");
+                await SendNotification($"The endpoint '{endpoint.Name}' is up. Hooray!");
             }
         }
 
-        private void SendNotification(string message)
+        private async Task SendNotification(string message)
         {
             var url = _settings.Notifications_Slack_WebHook;
             if (string.IsNullOrWhiteSpace(url)) return;
@@ -92,7 +94,7 @@ namespace sama.Services
                 using (var client = new HttpClient(httpHandler, false))
                 {
                     var data = JsonConvert.SerializeObject(new { text = message });
-                    client.PostAsync(url, new StringContent(data)).Wait();
+                    await client.PostAsync(url, new StringContent(data));
                 }
             }
             catch (Exception ex)

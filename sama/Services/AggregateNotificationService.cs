@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace sama.Services
 {
@@ -14,28 +15,28 @@ namespace sama.Services
             _notificationServices = notificationServices.ToList();
         }
 
-        public virtual void NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
+        public virtual async Task NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
         {
-            _notificationServices
-                .ForEach(ns => ns.NotifySingleResult(endpoint, result));
+            await Task.Run(() => _notificationServices
+                .ForEach(ns => ns.NotifySingleResult(endpoint, result)));
         }
 
-        public virtual void NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
+        public virtual async Task NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
         {
-            _notificationServices
-                .ForEach(ns => ns.NotifyUp(endpoint, downAsOf));
+            await Task.Run(() => _notificationServices
+                .ForEach(ns => ns.NotifyUp(endpoint, downAsOf)));
         }
 
-        public virtual void NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
+        public virtual async Task NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
         {
-            _notificationServices
-                .ForEach(ns => ns.NotifyDown(endpoint, downAsOf, reason));
+            await Task.Run(() => _notificationServices
+                .ForEach(ns => ns.NotifyDown(endpoint, downAsOf, reason)));
         }
 
-        public virtual void NotifyMisc(Endpoint endpoint, NotificationType type)
+        public virtual async Task NotifyMisc(Endpoint endpoint, NotificationType type)
         {
-            _notificationServices
-                .ForEach(ns => ns.NotifyMisc(endpoint, type));
+            await Task.Run(() => _notificationServices
+                .ForEach(ns => ns.NotifyMisc(endpoint, type)));
         }
     }
 }

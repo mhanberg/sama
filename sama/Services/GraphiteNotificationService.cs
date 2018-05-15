@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using sama.Models;
 
@@ -19,17 +20,19 @@ namespace sama.Services
             _tcpWrapper = tcpWrapper;
         }
 
-        public void NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
+        public Task NotifyDown(Endpoint endpoint, DateTimeOffset downAsOf, Exception reason)
         {
             // Ignore.
+            return Task.CompletedTask;
         }
 
-        public void NotifyMisc(Endpoint endpoint, NotificationType type)
+        public Task NotifyMisc(Endpoint endpoint, NotificationType type)
         {
             // Ignore.
+            return Task.CompletedTask;
         }
 
-        public void NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
+        public async Task NotifySingleResult(Endpoint endpoint, EndpointCheckResult result)
         {
             var host = _settings.Notifications_Graphite_Host;
             var port = _settings.Notifications_Graphite_Port;
@@ -53,7 +56,7 @@ namespace sama.Services
 
             try
             {
-                _tcpWrapper.SendData(host, port, messageBytes);
+                await _tcpWrapper.SendData(host, port, messageBytes);
             }
             catch (Exception ex)
             {
@@ -61,9 +64,10 @@ namespace sama.Services
             }
         }
 
-        public void NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
+        public Task NotifyUp(Endpoint endpoint, DateTimeOffset? downAsOf)
         {
             // Ignore.
+            return Task.CompletedTask;
         }
     }
 }

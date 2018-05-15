@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using System.Threading.Tasks;
 
 namespace sama.Services
 {
@@ -7,12 +8,12 @@ namespace sama.Services
     /// </summary>
     public class TcpClientWrapper
     {
-        public virtual void SendData(string address, int port, byte[] data)
+        public virtual async Task SendData(string address, int port, byte[] data)
         {
             using (var client = new TcpClient(address, port))
             using (var stream = client.GetStream())
             {
-                stream.Write(data, 0, data.Length);
+                await stream.WriteAsync(data, 0, data.Length);
             }
         }
     }
